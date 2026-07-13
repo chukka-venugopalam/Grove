@@ -1,26 +1,525 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --amber: #f59e0b;
+  --amber-dim: #a16207;
+  --amber-glow: rgba(245, 158, 11, 0.15);
+  --bg-base: #0a0a0a;
+  --bg-elevated: #111111;
+  --bg-surface: #1a1a1a;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a3a3a3;
+  --text-dim: #525252;
+  --crt-line: rgba(245, 158, 11, 0.03);
+  --vignette: radial-gradient(ellipse at center, transparent 60%, rgba(0, 0, 0, 0.7) 100%);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--bg-base);
+  --color-foreground: var(--text-primary);
+  --color-accent: var(--amber);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  scroll-behavior: auto;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   PERSISTENT NOISE TEXTURE (CSS grain overlay)
+   Always present at low opacity for texture,
+   even on "locked" sections.
+   ============================================ */
+
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+}
+
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  animation: noise-drift 0.5s steps(4) infinite;
+}
+
+@keyframes noise-drift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-5%, -5%); }
+  50% { transform: translate(-10%, 5%); }
+  75% { transform: translate(5%, -10%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ============================================
+   CRT SCANLINES
+   ============================================ */
+
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  pointer-events: none;
+}
+
+.crt-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    var(--crt-line) 2px,
+    var(--crt-line) 4px
+  );
+  pointer-events: none;
+}
+
+/* ============================================
+   VIGNETTE
+   ============================================ */
+
+.vignette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 98;
+  pointer-events: none;
+  background: var(--vignette);
+}
+
+/* ============================================
+   SHADER CANVAS CONTAINER
+   ============================================ */
+
+.shader-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* ============================================
+   CONTENT CONTAINER
+   ============================================ */
+
+.content-layer {
+  position: relative;
+  z-index: 10;
+}
+
+/* ============================================
+   SECTIONS
+   ============================================ */
+
+.frequency-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  position: relative;
+}
+
+/* ============================================
+   DIAL CONTAINER
+   ============================================ */
+
+.dial-container {
+  position: fixed;
+  bottom: 3rem;
+  right: 3rem;
+  z-index: 60;
+  width: 120px;
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .dial-container {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 96px;
+    height: 140px;
+  }
+}
+
+/* ============================================
+   FREQUENCY DISPLAY
+   ============================================ */
+
+.frequency-display {
+  font-family: var(--font-mono);
+  color: var(--amber);
+  text-align: center;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+.frequency-display .freq-num {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.frequency-display .freq-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--amber-dim);
+  margin-top: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+@media (max-width: 768px) {
+  .frequency-display .freq-num {
+    font-size: 1rem;
+  }
+  .frequency-display .freq-label {
+    font-size: 0.55rem;
+    max-width: 96px;
+  }
+}
+
+/* ============================================
+   SIGN-ON SECTION
+   ============================================ */
+
+.sign-on-content {
+  text-align: center;
+}
+
+.sign-on-content .name {
+  font-family: var(--font-sans);
+  font-size: clamp(3rem, 10vw, 7rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.sign-on-content .role {
+  font-family: var(--font-mono);
+  font-size: clamp(0.875rem, 2vw, 1.25rem);
+  color: var(--amber);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-top: 1rem;
+}
+
+/* ============================================
+   ABOUT / SKILLS SECTION
+   ============================================ */
+
+.skills-container {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.skills-container h2 {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--amber-dim);
+  margin-bottom: 2rem;
+}
+
+.skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.skill-chip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 2px;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.skill-chip.active {
+  border-color: var(--amber);
+  color: var(--amber);
+  opacity: 1;
+  box-shadow: 0 0 12px var(--amber-glow);
+}
+
+/* ============================================
+   STATION / PROJECT SECTION
+   ============================================ */
+
+.project-container {
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.project-header {
+  margin-bottom: 3rem;
+}
+
+.project-header .signal-meta {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: var(--amber-dim);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.project-header .signal-meta .bar {
+  display: inline-block;
+  width: 24px;
+  height: 8px;
+  background: linear-gradient(90deg, var(--amber), transparent);
+}
+
+.project-header .project-title {
+  font-family: var(--font-sans);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--text-primary);
+}
+
+.project-hero {
+  width: 100%;
+  height: 240px;
+  background: var(--bg-elevated);
+  border: 1px solid rgba(245, 158, 11, 0.1);
+  border-radius: 4px;
+  margin-bottom: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.project-hero .placeholder {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+.project-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.project-block {
+  border-left: 2px solid rgba(245, 158, 11, 0.2);
+  padding-left: 1.25rem;
+}
+
+.project-block .block-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--amber-dim);
+  margin-bottom: 0.5rem;
+}
+
+.project-block .block-text {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.project-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.project-tech span {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  border-radius: 2px;
+  color: var(--amber-dim);
+}
+
+/* ============================================
+   OFF AIR / CONTACT
+   ============================================ */
+
+.contact-container {
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.contact-container h2 {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--amber-dim);
+  margin-bottom: 0.5rem;
+}
+
+.contact-container p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.contact-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.contact-link {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.contact-link:hover {
+  color: var(--amber);
+  border-color: var(--amber);
+  box-shadow: 0 0 16px var(--amber-glow);
+}
+
+/* ============================================
+   MUTE TOGGLE
+   ============================================ */
+
+.mute-toggle {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 80;
+  background: transparent;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: var(--amber-dim);
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  transition: all 0.3s ease;
+  line-height: 1;
+}
+
+.mute-toggle:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+  box-shadow: 0 0 12px var(--amber-glow);
+}
+
+.mute-toggle.muted {
+  opacity: 0.4;
+  border-color: rgba(245, 158, 11, 0.1);
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .noise-overlay,
+  .noise-overlay::before,
+  .crt-overlay::after,
+  .shader-layer {
+    display: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(245, 158, 11, 0.2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 158, 11, 0.4);
+}
+
+/* ============================================
+   SELECTION
+   ============================================ */
+
+::selection {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--amber);
 }
