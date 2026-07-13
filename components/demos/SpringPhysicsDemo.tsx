@@ -15,7 +15,7 @@ export default function SpringPhysicsDemo() {
         height: 300,
         position: 'relative',
         overflow: 'hidden',
-        border: '1px solid rgba(245, 158, 11, 0.1)',
+        border: '1px solid rgba(94, 234, 212, 0.08)',
         borderRadius: 4,
         background: 'rgba(0,0,0,0.2)',
       }}
@@ -30,8 +30,8 @@ export default function SpringPhysicsDemo() {
           width: 120,
           height: 120,
           borderRadius: 12,
-          background: 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(245,158,11,0.05))',
-          border: '1px solid rgba(245,158,11,0.4)',
+          background: 'linear-gradient(135deg, rgba(94, 234, 212, 0.2), rgba(94, 234, 212, 0.03))',
+          border: '1px solid rgba(94, 234, 212, 0.3)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -43,18 +43,18 @@ export default function SpringPhysicsDemo() {
           marginLeft: -60,
           fontSize: '0.65rem',
           fontFamily: 'var(--font-mono)',
-          color: 'var(--amber-dim)',
+          color: 'var(--accent)',
           letterSpacing: '0.1em',
           userSelect: 'none',
-          boxShadow: isDragging ? '0 0 30px rgba(245,158,11,0.2)' : '0 0 10px rgba(245,158,11,0.05)',
+          boxShadow: isDragging ? '0 0 30px rgba(94, 234, 212, 0.15)' : '0 0 10px rgba(94, 234, 212, 0.03)',
         }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95, cursor: 'grabbing' }}
         transition={{
           type: 'spring',
-          stiffness: 300,
-          damping: 20,
-          mass: 1,
+          stiffness: 200,
+          damping: 25,
+          mass: 1.2,
         }}
       >
         {isDragging ? 'RELEASE' : 'DRAG ME'}

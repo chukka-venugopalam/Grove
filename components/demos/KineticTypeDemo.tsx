@@ -33,7 +33,7 @@ export default function KineticTypeDemo() {
       style={{
         width: '100%',
         height: 280,
-        border: '1px solid rgba(245, 158, 11, 0.1)',
+        border: '1px solid rgba(94, 234, 212, 0.06)',
         borderRadius: 4,
         background: 'rgba(0,0,0,0.2)',
         display: 'flex',
@@ -65,14 +65,14 @@ export default function KineticTypeDemo() {
                 fontFamily: 'var(--font-sans)',
                 fontSize: `${3 + influence * 1.5}rem`,
                 fontWeight: Math.round(weight),
-                color: influence > 0.3 ? 'var(--amber)' : 'var(--amber-dim)',
+                color: influence > 0.3 ? 'var(--accent)' : 'var(--accent-dim)',
                 display: 'inline-block',
                 transform: `scaleY(${scale})`,
-                transition: 'color 0.15s ease',
+                transition: 'color 0.15s ease, text-shadow 0.15s ease',
                 lineHeight: 1,
                 letterSpacing: influence > 0.3 ? '0.05em' : '0.1em',
                 textShadow: influence > 0.5
-                  ? `0 0 ${influence * 12}px var(--amber-glow)`
+                  ? `0 0 ${influence * 12}px var(--accent-glow)`
                   : 'none',
               }}
             >

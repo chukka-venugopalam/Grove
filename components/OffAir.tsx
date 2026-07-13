@@ -1,30 +1,36 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useFrequencyContext } from '@/app/providers';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 export default function OffAir() {
-  const { frequency } = useFrequencyContext();
-  const isActive = frequency.currentStation?.id === 'contact';
-  const opacity = isActive ? frequency.signalStrength : 0;
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+
+  const opacity = useTransform(scrollYProgress, [0, 0.4, 0.6, 1], [0, 1, 1, 0]);
+  const y = useTransform(scrollYProgress, [0, 0.4, 0.6, 1], [60, 0, 0, -60]);
+  const blurValue = useTransform(scrollYProgress, [0, 0.4, 0.6, 1], [12, 0, 0, 12]);
+  const filter = useTransform(blurValue, (b) => `blur(${b}px)`);
 
   return (
     <section
+      ref={sectionRef}
       className="frequency-section"
       id="station-off-air"
+      style={{ overflow: 'hidden' }}
     >
       <motion.div
         className="contact-container"
-        style={{
-          opacity,
-          filter: `blur(${(1 - frequency.signalStrength) * 8}px)`,
-          transition: 'opacity 0.6s ease, filter 0.6s ease',
-        }}
+        style={{ opacity, y, filter }}
       >
-        <h2>END OF BAND</h2>
+        <h2>Get in Touch</h2>
         <p>
-          The signal ends here — for now. If you&apos;d like to get in touch,
-          send a transmission through any of the channels below.
+          If you&apos;d like to get in touch, send a transmission through any
+          of the channels below.
         </p>
         <div className="contact-links">
           <a
@@ -32,7 +38,7 @@ export default function OffAir() {
             className="contact-link"
             rel="noopener noreferrer"
           >
-            ✦ Email
+            Email
           </a>
           <a
             href="https://github.com"
@@ -40,7 +46,7 @@ export default function OffAir() {
             rel="noopener noreferrer"
             className="contact-link"
           >
-            ✦ GitHub
+            GitHub
           </a>
           <a
             href="https://linkedin.com"
@@ -48,7 +54,7 @@ export default function OffAir() {
             rel="noopener noreferrer"
             className="contact-link"
           >
-            ✦ LinkedIn
+            LinkedIn
           </a>
         </div>
         <p
@@ -60,7 +66,7 @@ export default function OffAir() {
             letterSpacing: '0.15em',
           }}
         >
-          SIGNAL LOST • {new Date().getFullYear()}
+          &copy; {new Date().getFullYear()} &middot; VENUGOPALAM CHUKKA
         </p>
       </motion.div>
     </section>

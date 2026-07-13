@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useMemo } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 /* ─── Interactive distortion shader ─── */
@@ -24,6 +24,9 @@ const DistortionShader = {
     uniform float uTime;
     uniform vec2 uMouse;
 
+    // Muted teal accent: hsl(174, 60%, 60%) = rgb(0.37, 0.92, 0.83)
+    const vec3 TEAL = vec3(0.37, 0.92, 0.83);
+
     void main() {
       vec2 uv = vUv;
       vec2 mouse = uMouse;
@@ -35,20 +38,20 @@ const DistortionShader = {
       float ripple = sin(dist * 30.0 - uTime * 3.0) * 0.03 / (dist * 1.5 + 0.5);
       vec2 distortedUv = uv + (uv - mouse) * ripple;
 
-      // Color field — amber tones
-      float r = 0.96 * (0.5 + 0.5 * sin(distortedUv.x * 4.0 + uTime * 0.5));
-      float g = 0.62 * (0.5 + 0.5 * sin(distortedUv.y * 4.0 + uTime * 0.4));
-      float b = 0.04 * (0.5 + 0.5 * sin((distortedUv.x + distortedUv.y) * 3.0 + uTime * 0.3));
+      // Color field — teal tones
+      float r = TEAL.r * (0.5 + 0.5 * sin(distortedUv.x * 4.0 + uTime * 0.5));
+      float g = TEAL.g * (0.5 + 0.5 * sin(distortedUv.y * 4.0 + uTime * 0.4));
+      float b = TEAL.b * (0.5 + 0.5 * sin((distortedUv.x + distortedUv.y) * 3.0 + uTime * 0.3));
 
       // Cursor glow
       float glow = 0.15 / (dist * 2.0 + 0.3);
       r += glow * 0.3;
-      g += glow * 0.2;
+      g += glow * 0.3;
 
       // Grid lines for structure
       float gridX = step(0.95, fract(distortedUv.x * 12.0));
       float gridY = step(0.95, fract(distortedUv.y * 12.0));
-      float grid = max(gridX, gridY) * 0.15;
+      float grid = max(gridX, gridY) * 0.1;
       r += grid;
       g += grid;
 
@@ -58,29 +61,30 @@ const DistortionShader = {
 };
 
 function ShaderQuad() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const { size, pointer } = useThree();
-  const material = useMemo(() => {
-    return new THREE.ShaderMaterial({
-      ...DistortionShader,
-    });
-  }, []);
+  const materialRef = useRef<THREE.ShaderMaterial | null>(null);
 
   useFrame((state) => {
-    if (material) {
-      material.uniforms.uTime.value = state.clock.elapsedTime;
-      // Map pointer (ranges from -1 to 1) to 0-1 UV space
-      material.uniforms.uMouse.value.set(
-        pointer.x * 0.5 + 0.5,
-        pointer.y * 0.5 + 0.5
-      );
-    }
+    const mat = materialRef.current;
+    if (!mat) return;
+    // Update uniforms every frame
+    mat.uniforms.uTime.value = state.clock.elapsedTime;
+    mat.uniforms.uMouse.value.set(
+      state.pointer.x * 0.5 + 0.5,
+      state.pointer.y * 0.5 + 0.5
+    );
   });
 
   return (
-    <mesh ref={meshRef}>
+    <mesh>
       <planeGeometry args={[2, 2]} />
-      <primitive object={material} attach="material" />
+      <shaderMaterial
+        ref={materialRef}
+        args={[{
+          uniforms: DistortionShader.uniforms,
+          vertexShader: DistortionShader.vertexShader,
+          fragmentShader: DistortionShader.fragmentShader,
+        }]}
+      />
     </mesh>
   );
 }
@@ -93,7 +97,7 @@ export default function ShaderDemo() {
         height: 300,
         borderRadius: 4,
         overflow: 'hidden',
-        border: '1px solid rgba(245, 158, 11, 0.1)',
+        border: '1px solid rgba(94, 234, 212, 0.06)',
       }}
     >
       <Canvas

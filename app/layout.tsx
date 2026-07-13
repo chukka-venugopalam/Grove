@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono, Playfair_Display } from 'next/font/google';
 import './globals.css';
+import AmbientBackground from '@/components/AmbientBackground';
+import CursorGlow from '@/components/CursorGlow';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -14,16 +16,23 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
+const playfairDisplay = Playfair_Display({
+  variable: '--font-playfair-display',
+  subsets: ['latin'],
+  display: 'swap',
+  style: ['normal', 'italic'],
+});
+
 export const metadata: Metadata = {
-  title: 'Frequency — VENUGOPALAM CHUKKA',
+  title: 'Drift — VENUGOPALAM CHUKKA',
   description:
-    'A portfolio built on the broadcast metaphor. Tune into projects, skills, and transmissions.',
-  keywords: ['portfolio', 'developer', 'creative', 'frequency', 'broadcast'],
+    'A portfolio built around quiet, breathing motion, floating aesthetics, and smooth scroll transitions.',
+  keywords: ['portfolio', 'developer', 'creative', 'drift', 'smooth', 'animations'],
   authors: [{ name: 'VENUGOPALAM CHUKKA' }],
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0a0a0a',
+  themeColor: '#030303',
   width: 'device-width',
   initialScale: 1,
 };
@@ -36,15 +45,17 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${jetbrainsMono.variable} ${playfairDisplay.variable}`}
       suppressHydrationWarning
     >
-      <body className="bg-[var(--bg-base)] text-[var(--text-primary)] antialiased">
-        {/* Persistent CRT overlay */}
-        <div className="crt-overlay" aria-hidden="true" />
-        <div className="vignette-overlay" aria-hidden="true" />
-        {/* Persistent CSS Noise Overlay */}
-        <div className="noise-overlay" aria-hidden="true" />
+      <body className="bg-[var(--bg-base)] text-[var(--text-primary)] antialiased relative min-h-screen">
+        {/* Ambient Particle Field Background */}
+        <AmbientBackground />
+        
+        {/* Cursor Halo Glow */}
+        <CursorGlow />
+
+        {/* Core Portfolio Content */}
         {children}
       </body>
     </html>

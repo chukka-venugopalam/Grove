@@ -2,45 +2,23 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useFrequencyContext } from '@/app/providers';
+import { useStationContext } from '@/app/providers';
 import { stations } from '@/lib/stations';
 
-function getRandomItems<T>(arr: T[], count: number): number[] {
-  // Deterministic "random" selection based on array length
-  const indices: number[] = [];
-  const seed = arr.length;
-  for (let i = 0; i < count && i < arr.length; i++) {
-    const idx = (seed * 7 + i * 13) % arr.length;
-    if (!indices.includes(idx)) indices.push(idx);
-  }
-  return indices;
-}
-
 export default function SkillsSignal() {
-  const { frequency } = useFrequencyContext();
+  const { activeStationId } = useStationContext();
 
-  const aboutStation = stations.find((s) => s.type === 'about');
-  const allSkills = aboutStation?.skills ?? [];
+  // Find the active station's skills
+  const activeSkills = useMemo(() => {
+    const activeStation = stations.find((s) => s.id === activeStationId);
+    return activeStation?.skills ?? [];
+  }, [activeStationId]);
 
-  // Pick 2 skills for idle drift (deterministic selection)
-  const driftIndices = useMemo(() => getRandomItems(allSkills, 2), [allSkills.length]);
+  // Default to about section skills if no active station
+  const displaySkills = activeSkills.length > 0 ? activeSkills
+    : stations.find((s) => s.type === 'about')?.skills ?? [];
 
-  const skillStates = useMemo(() => {
-    return allSkills.map((skill, index) => {
-      const skillPosition = index / Math.max(allSkills.length - 1, 1);
-      const dist = Math.abs(frequency.position - skillPosition);
-      const clarity = Math.max(0, 1 - dist * 4);
-
-      // Whether this skill gets idle drift oscillation
-      const isDrifting = driftIndices.includes(index);
-
-      return { skill, clarity, isDrifting };
-    });
-  }, [allSkills, frequency.position, driftIndices]);
-
-  if (frequency.signalStrength < 0.05 && skillStates.every((s) => s.clarity < 0.1)) {
-    return null;
-  }
+  if (displaySkills.length === 0) return null;
 
   return (
     <div
@@ -58,47 +36,28 @@ export default function SkillsSignal() {
         maxWidth: '140px',
       }}
     >
-      {skillStates.map(({ skill, clarity, isDrifting }) =>
-        clarity > 0.05 || isDrifting ? (
-          <motion.span
-            key={skill}
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.6rem',
-              letterSpacing: '0.1em',
-              color: clarity > 0.6 ? 'var(--amber)' : 'var(--amber-dim)',
-              whiteSpace: 'nowrap',
-              textShadow:
-                clarity > 0.5
-                  ? '0 0 8px var(--amber-glow)'
-                  : 'none',
-            }}
-            animate={
-              isDrifting
-                ? {
-                    opacity: [clarity * 0.5 + 0.05, clarity * 0.5 + 0.2, clarity * 0.5 + 0.05],
-                  }
-                : {
-                    opacity: clarity * 0.6,
-                  }
-            }
-            transition={
-              isDrifting
-                ? {
-                    duration: 3.5,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }
-                : {
-                    duration: 0.8,
-                    ease: 'easeInOut',
-                  }
-            }
-          >
-            {clarity > 0.5 ? '◈' : '◇'} {skill}
-          </motion.span>
-        ) : null
-      )}
+      {displaySkills.map((skill, index) => (
+        <motion.span
+          key={skill}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 0.5, x: 0 }}
+          exit={{ opacity: 0, x: -10 }}
+          transition={{
+            delay: index * 0.03,
+            duration: 0.5,
+            ease: 'easeOut',
+          }}
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.6rem',
+            letterSpacing: '0.1em',
+            color: index % 3 === 0 ? 'var(--accent)' : 'var(--text-dim)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          &rsaquo; {skill}
+        </motion.span>
+      ))}
     </div>
   );
 }

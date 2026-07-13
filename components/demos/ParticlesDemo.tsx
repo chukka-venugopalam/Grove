@@ -88,7 +88,7 @@ export default function ParticlesDemo() {
           p.vy += (dy / dist) * force;
         }
 
-        // Ambient Brownian drift — keeps particles alive even without cursor
+        // Ambient Brownian drift
         p.vx += (Math.random() - 0.5) * 0.015;
         p.vy += (Math.random() - 0.5) * 0.015;
 
@@ -106,15 +106,15 @@ export default function ParticlesDemo() {
         if (p.y < -10) p.y = h + 10;
         if (p.y > h + 10) p.y = -10;
 
-        // Draw
+        // Draw with teal accent
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(245, 158, 11, ${p.alpha})`;
+        ctx.fillStyle = `rgba(94, 234, 212, ${p.alpha * 0.7})`;
         ctx.fill();
       }
 
       // Draw faint connections between nearby particles
-      ctx.strokeStyle = 'rgba(245, 158, 11, 0.06)';
+      ctx.strokeStyle = 'rgba(94, 234, 212, 0.04)';
       ctx.lineWidth = 0.5;
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
@@ -148,7 +148,7 @@ export default function ParticlesDemo() {
       style={{
         width: '100%',
         height: 300,
-        border: '1px solid rgba(245, 158, 11, 0.1)',
+        border: '1px solid rgba(94, 234, 212, 0.06)',
         borderRadius: 4,
         overflow: 'hidden',
         position: 'relative',

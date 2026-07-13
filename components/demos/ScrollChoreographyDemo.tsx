@@ -29,7 +29,7 @@ export default function ScrollChoreographyDemo() {
       style={{
         width: '100%',
         height: 300,
-        border: '1px solid rgba(245, 158, 11, 0.1)',
+        border: '1px solid rgba(94, 234, 212, 0.06)',
         borderRadius: 4,
         background: 'rgba(0,0,0,0.2)',
         overflowY: 'auto',
@@ -45,14 +45,14 @@ export default function ScrollChoreographyDemo() {
           padding: '6px 12px',
           fontFamily: 'var(--font-mono)',
           fontSize: '0.5rem',
-          color: 'var(--amber-dim)',
+          color: 'var(--accent-dim)',
           letterSpacing: '0.15em',
-          background: 'rgba(10,10,10,0.8)',
-          borderBottom: '1px solid rgba(245,158,11,0.1)',
+          background: 'rgba(3,3,3,0.8)',
+          borderBottom: '1px solid rgba(94, 234, 212, 0.06)',
           textAlign: 'center' as const,
         }}
       >
-        SCROLL ↓ {Math.round(scrollProgress * 100)}%
+        SCROLL &darr; {Math.round(scrollProgress * 100)}%
       </div>
 
       {/* Choreography content */}
@@ -88,15 +88,15 @@ export default function ScrollChoreographyDemo() {
               style={{
                 width: 64,
                 height: 64,
-                background: `rgba(245,158,11,${0.08 + localProgress * 0.2})`,
-                border: `1px solid rgba(245,158,11,${0.15 + localProgress * 0.3})`,
+                background: `rgba(94, 234, 212, ${0.05 + localProgress * 0.12})`,
+                border: `1px solid rgba(94, 234, 212, ${0.1 + localProgress * 0.25})`,
                 borderRadius: 4,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontFamily: 'var(--font-mono)',
                 fontSize: '1.2rem',
-                color: localProgress > 0.5 ? 'var(--amber)' : 'var(--amber-dim)',
+                color: localProgress > 0.5 ? 'var(--accent)' : 'var(--accent-dim)',
                 opacity,
                 x: assembleX,
                 y: assembleY,

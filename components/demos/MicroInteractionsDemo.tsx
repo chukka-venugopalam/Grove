@@ -14,11 +14,11 @@ function ShimmerButton() {
       style={{
         padding: '8px 18px',
         background: clicked
-          ? 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(245,158,11,0.1))'
-          : 'linear-gradient(135deg, rgba(245,158,11,0.15), transparent)',
-        border: '1px solid rgba(245,158,11,0.3)',
+          ? 'linear-gradient(135deg, rgba(94, 234, 212, 0.2), rgba(94, 234, 212, 0.06))'
+          : 'linear-gradient(135deg, rgba(94, 234, 212, 0.1), transparent)',
+        border: '1px solid rgba(94, 234, 212, 0.2)',
         borderRadius: 4,
-        color: clicked ? 'var(--amber)' : 'var(--amber-dim)',
+        color: clicked ? 'var(--accent)' : 'var(--accent-dim)',
         fontFamily: 'var(--font-mono)',
         fontSize: '0.6rem',
         cursor: 'pointer',
@@ -35,7 +35,7 @@ function ShimmerButton() {
           style={{
             position: 'absolute',
             inset: 0,
-            background: 'linear-gradient(90deg, transparent, rgba(245,158,11,0.3), transparent)',
+            background: 'linear-gradient(90deg, transparent, rgba(94, 234, 212, 0.25), transparent)',
           }}
         />
       )}
@@ -56,11 +56,11 @@ function MorphToggle() {
         borderRadius: 11,
         padding: 2,
         cursor: 'pointer',
-        background: on ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.08)',
+        background: on ? 'rgba(94, 234, 212, 0.2)' : 'rgba(255,255,255,0.06)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: on ? 'flex-end' : 'flex-start',
-        border: '1px solid rgba(245,158,11,0.2)',
+        border: '1px solid rgba(94, 234, 212, 0.15)',
       }}
       layout
       transition={{ type: 'spring', stiffness: 500, damping: 30 }}
@@ -72,7 +72,7 @@ function MorphToggle() {
           width: 16,
           height: 16,
           borderRadius: on ? 4 : 8,
-          background: on ? 'var(--amber)' : 'rgba(255,255,255,0.3)',
+          background: on ? 'var(--accent)' : 'rgba(255,255,255,0.25)',
         }}
       />
     </motion.div>
@@ -86,7 +86,7 @@ function RippleButton() {
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.9 }}
-      onClick={(e) => {
+      onClick={() => {
         const id = Date.now();
         setRipples((prev) => [...prev, id]);
         setTimeout(() => setRipples((prev) => prev.filter((r) => r !== id)), 600);
@@ -94,9 +94,9 @@ function RippleButton() {
       style={{
         padding: '8px 18px',
         background: 'transparent',
-        border: '1px solid rgba(245,158,11,0.3)',
+        border: '1px solid rgba(94, 234, 212, 0.2)',
         borderRadius: 4,
-        color: 'var(--amber-dim)',
+        color: 'var(--accent-dim)',
         fontFamily: 'var(--font-mono)',
         fontSize: '0.6rem',
         cursor: 'pointer',
@@ -116,7 +116,7 @@ function RippleButton() {
             position: 'absolute',
             inset: 0,
             borderRadius: '50%',
-            background: 'rgba(245,158,11,0.2)',
+            background: 'rgba(94, 234, 212, 0.15)',
           }}
         />
       ))}
@@ -136,7 +136,7 @@ function StaggerCard() {
         gap: 4,
         cursor: 'pointer',
         padding: '8px 12px',
-        border: '1px solid rgba(245,158,11,0.15)',
+        border: '1px solid rgba(94, 234, 212, 0.1)',
         borderRadius: 4,
       }}
     >
@@ -157,7 +157,7 @@ function StaggerCard() {
             width: 12,
             height: 24,
             borderRadius: 3,
-            background: `rgba(245,158,11,${0.3 + i * 0.2})`,
+            background: `rgba(94, 234, 212, ${0.2 + i * 0.15})`,
           }}
         />
       ))}
@@ -175,9 +175,9 @@ function PressFill() {
       onMouseLeave={() => setPressing(false)}
       style={{
         padding: '8px 18px',
-        border: '1px solid rgba(245,158,11,0.3)',
+        border: '1px solid rgba(94, 234, 212, 0.2)',
         borderRadius: 4,
-        color: pressing ? 'var(--bg-base)' : 'var(--amber-dim)',
+        color: pressing ? 'var(--bg-base)' : 'var(--accent-dim)',
         fontFamily: 'var(--font-mono)',
         fontSize: '0.55rem',
         cursor: 'pointer',
@@ -194,7 +194,7 @@ function PressFill() {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'var(--amber)',
+          background: 'var(--accent)',
         }}
       />
       <span style={{ position: 'relative', zIndex: 1 }}>
@@ -211,7 +211,7 @@ export default function MicroInteractionsDemo() {
       style={{
         width: '100%',
         minHeight: 280,
-        border: '1px solid rgba(245, 158, 11, 0.1)',
+        border: '1px solid rgba(94, 234, 212, 0.06)',
         borderRadius: 4,
         background: 'rgba(0,0,0,0.2)',
         display: 'flex',
