@@ -1,13 +1,24 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { ReactLenis, useLenis } from 'lenis/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import GroveScene from '@/components/GroveScene';
 import AboutBookends from '@/components/AboutBookends';
+import ProgressTrail from '@/components/ProgressTrail';
 
 export default function Home() {
   const scrollRef = useRef(0);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Enforce a minimum loading sequence (2.2s) to allow R3F canvas and shaders to initialize smoothly
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2200);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Memoized Lenis scroll callback
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,6 +46,9 @@ export default function Home() {
 
         {/* Start & End About Me Bookends */}
         <AboutBookends scrollProgress={scrollProgress} />
+
+        {/* Persistent progress trail dots wayfinding & jump navigation */}
+        <ProgressTrail scrollProgress={scrollProgress} />
 
         {/* Status HUD overlay */}
         <div
@@ -122,6 +136,100 @@ export default function Home() {
             <span>{(scrollProgress * 100).toFixed(1)}%</span>
           </div>
         </div>
+
+        {/* Staged entry loader overlay */}
+        <AnimatePresence>
+          {isLoading && (
+            <motion.div
+              key="loader"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: 'easeInOut' }}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 1000,
+                background: '#050c08',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '2.5rem',
+              }}
+            >
+              {/* Pulsing Glowing Spore Seed */}
+              <div style={{ position: 'relative', width: 64, height: 64 }}>
+                <motion.div
+                  animate={{
+                    scale: [1, 2.0, 1],
+                    opacity: [0.15, 0.45, 0.15],
+                  }}
+                  transition={{
+                    duration: 2.0,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                  style={{
+                    position: 'absolute',
+                    inset: -32,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, #fbbf24 0%, transparent 70%)',
+                  }}
+                />
+                <motion.div
+                  animate={{
+                    scale: [0.9, 1.1, 0.9],
+                    boxShadow: [
+                      '0 0 15px rgba(251, 191, 36, 0.6)',
+                      '0 0 30px rgba(251, 191, 36, 0.9)',
+                      '0 0 15px rgba(251, 191, 36, 0.6)',
+                    ],
+                  }}
+                  transition={{
+                    duration: 2.0,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    background: '#fbbf24',
+                    border: '2px solid rgba(255, 255, 255, 0.25)',
+                  }}
+                />
+              </div>
+
+              {/* Status information */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+                <motion.div
+                  animate={{ opacity: [0.35, 1.0, 0.35] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{
+                    fontFamily: 'var(--font-mono), monospace',
+                    fontSize: '0.72rem',
+                    color: '#ffffff',
+                    letterSpacing: '0.3em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Initializing Grove
+                </motion.div>
+                <div
+                  style={{
+                    fontFamily: 'var(--font-mono), monospace',
+                    fontSize: '0.58rem',
+                    color: '#34d399',
+                    opacity: 0.6,
+                    letterSpacing: '0.12em',
+                  }}
+                >
+                  Synthesizing 3D Garden Environment...
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Dummy scroll area */}
         <div style={{ height: '500vh', width: '100%', pointerEvents: 'none' }} />
